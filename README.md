@@ -1,34 +1,34 @@
 # X-Ray Security Vision
 
-Bu proje, X-Ray görüntülerinde tehdit unsurlarını (silah, bıçak, mermi vb.) tespit etmek için geliştirilmiş yapay zeka tabanlı bir güvenlik sistemidir.
+An AI-powered security system designed to detect threat items (guns, knives, bullets, etc.) in X-Ray images.
 
-## Özellikler
+## Features
 
-- **Gerçek Zamanlı Tespit:** YOLOv11 modeli ile hızlı ve hassas nesne tespiti.
-- **Video Analizi:** Canlı kamera akışı veya video dosyaları üzerinde analiz yapabilme.
-- **Tehdit Algılama:** Silah ve bıçak gibi tehlikeli nesneler için özel uyarı sistemi.
-- **Gelişmiş Arayüz:** React ile geliştirilmiş, kullanıcı dostu modern arayüz.
-- **API Desteği:** FastAPI tabanlı esnek backend mimarisi.
+- **Real-Time Detection:** Fast and accurate object detection using YOLOv11 model.
+- **Video Analysis:** Analyze live camera streams or video files.
+- **Threat Detection:** Specialized alert system for dangerous objects like weapons and knives.
+- **Advanced Interface:** Modern, user-friendly interface built with React.
+- **API Support:** Flexible backend architecture based on FastAPI.
 
-## Kurulum
+## Installation
 
-### Gereksinimler
+### Requirements
 - Python 3.8+
 - Node.js 16+
 
-### Backend Kurulumu
+### Backend Setup
 ```bash
 pip install -r requirements.txt
 python backend/main.py
 ```
 
-### Frontend Kurulumu
+### Frontend Setup
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-## Kullanım
-Tarayıcıda `http://localhost:5178` adresine giderek sistemi kullanabilirsiniz.
+## Usage
+Access the system by navigating to `http://localhost:5178` in your browser.
 
