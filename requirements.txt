@@ -1,0 +1,144 @@
+# YOLOv11 X-Ray Security System - Requirements
+# Python 3.8+ gereklidir
+
+# ============================================
+# TEMEL KÜTÜPHANELER
+# ============================================
+
+# Deep Learning Framework
+torch>=2.0.0
+torchvision>=0.15.0
+ultralytics>=8.0.0  # YOLOv11 için
+
+# ============================================
+# PHASE 1: Hızlı Kazançlar
+# ============================================
+
+# Computer Vision & Image Processing
+opencv-python>=4.8.0
+opencv-contrib-python>=4.8.0
+Pillow>=10.0.0
+
+# Data Science
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.17.0
+
+# ============================================
+# PHASE 2: Orta Seviye Teknikler
+# ============================================
+
+# SAHI - Slicing Aided Hyper Inference
+sahi>=0.11.14
+
+# Ensemble Methods
+ensemble-boxes>=1.0.9
+
+# Advanced Data Augmentation
+albumentations>=1.3.1
+imgaug>=0.4.0
+
+# ============================================
+# PHASE 3: İleri Seviye
+# ============================================
+
+# Hyperparameter Optimization
+optuna>=3.3.0
+ray[tune]>=2.7.0
+
+# Model Export & Optimization
+onnx>=1.15.0
+onnxruntime>=1.16.0
+# onnxruntime-gpu>=1.16.0  # GPU varsa uncomment
+
+# ============================================
+# EXPERIMENT TRACKING & MONITORING
+# ============================================
+
+# Experiment Tracking (Optional ama önerilir)
+wandb>=0.15.0
+tensorboard>=2.14.0
+
+# ============================================
+# UTILITY LIBRARIES
+# ============================================
+
+# Progress Bars
+tqdm>=4.66.0
+
+# YAML Configuration
+PyYAML>=6.0.1
+
+# JSON & File Operations
+jsonlines>=4.0.0
+
+# Image Metadata
+pyexif>=0.5.0
+
+# Timing & Performance
+timm>=0.9.7  # PyTorch Image Models
+
+# ============================================
+# DATA HANDLING
+# ============================================
+
+# Dataset Management
+roboflow>=1.1.0  # Dataset management
+fiftyone>=0.22.0  # Dataset visualization (optional)
+
+# ============================================
+# API & WEB (PHASE 4)
+# ============================================
+
+# REST API
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.4.0
+
+# ============================================
+# TESTING & QUALITY
+# ============================================
+
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.9.0
+flake8>=6.1.0
+
+# ============================================
+# EXPORT OPTIONS
+# ============================================
+
+# Mobile & Edge Deployment
+coremltools>=7.0  # iOS deployment
+tensorflow>=2.14.0  # TFLite export için (optional)
+
+# ============================================
+# GPU ACCELERATION (Optional)
+# ============================================
+
+# NVIDIA için
+# nvidia-tensorrt>=8.6.0
+# pycuda>=2022.2
+
+# ============================================
+# NOTLAR
+# ============================================
+
+# Kurulum sırası:
+# 1. pip install --upgrade pip
+# 2. pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118  # CUDA 11.8 için
+# 3. pip install -r requirements.txt
+
+# Minimal kurulum için (sadece Phase 0-1):
+# pip install torch torchvision ultralytics opencv-python numpy pandas matplotlib seaborn tqdm PyYAML
+
+# GPU check:
+# python -c "import torch; print(f'CUDA Available: {torch.cuda.is_available()}')"
+
+
+

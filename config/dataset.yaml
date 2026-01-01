@@ -1,0 +1,27 @@
+# YOLOv11 Dataset Configuration
+# Lütfen 'path' kısmını kendi veri setinizin tam yoluyla değiştirin.
+
+# Veri seti kök dizini (Absolute path önerilir)
+# Örnek: C:/Users/erena/Desktop/Xray/dataset
+path: C:/Users/erena/Desktop/Xray/dataset  # <--- BURAYI GÜNCELLEYİN
+
+# Alt klasörler (path'e göre relatif)
+train: train/images  # train images (relative to 'path') 
+val: valid/images    # val images (relative to 'path')
+test: test/images    # test images (optional)
+
+# Sınıf İsimleri (Modelinizdeki sırayla aynı olmalı)
+names:
+  0: Baton
+  1: Bullet
+  2: Gun
+  3: Hammer
+  4: HandCuffs
+  5: Knife
+  6: Lighter
+  7: Pliers
+  8: Powerbank
+  9: Scissors
+  10: Sprayer
+  11: Wrench
+

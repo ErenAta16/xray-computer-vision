@@ -1,0 +1,247 @@
+# YOLOv11 X-Ray Security System - Augmentation Configuration
+# Bu dosya hem training hem de TTA (Test Time Augmentation) için kullanılır
+
+# ============================================
+# TEST TIME AUGMENTATION (TTA) - PHASE 1
+# ============================================
+tta:
+  enabled: true
+  
+  # Hangi augmentationların kullanılacağı
+  transforms:
+    horizontal_flip:
+      enabled: true
+      prob: 1.0
+    
+    vertical_flip:
+      enabled: false  # X-ray için genellikle gereksiz
+      prob: 0.0
+    
+    multi_scale:
+      enabled: true
+      scales: [0.8, 1.0, 1.2]  # Görüntü boyutu çarpanları
+    
+    rotation:
+      enabled: true
+      angles: [-10, 0, 10]  # Derece cinsinden
+    
+    brightness_contrast:
+      enabled: true
+      brightness_range: [-0.1, 0.1]
+      contrast_range: [-0.1, 0.1]
+  
+  # TTA sonuçlarını birleştirme stratejisi
+  merge_strategy:
+    method: "wbf"  # "wbf", "nms", "soft_nms", "voting"
+    iou_threshold: 0.5
+    skip_box_threshold: 0.25
+    weights: null  # null ise eşit ağırlık
+
+# ============================================
+# TRAINING AUGMENTATION - PHASE 3
+# ============================================
+training:
+  enabled: true
+  
+  # YOLOv11 built-in augmentations
+  yolo_augmentations:
+    hsv_h: 0.015        # HSV-Hue augmentation
+    hsv_s: 0.7          # HSV-Saturation augmentation
+    hsv_v: 0.4          # HSV-Value augmentation
+    degrees: 10.0       # Rotation
+    translate: 0.1      # Translation
+    scale: 0.5          # Scaling
+    shear: 0.0          # Shear
+    perspective: 0.0    # Perspective
+    flipud: 0.0         # Vertical flip probability
+    fliplr: 0.5         # Horizontal flip probability
+    mosaic: 1.0         # Mosaic augmentation probability
+    mixup: 0.1          # MixUp augmentation probability
+    copy_paste: 0.0     # Copy-paste augmentation probability
+  
+  # Albumentations (Advanced)
+  albumentations:
+    enabled: true
+    
+    # X-ray specific augmentations
+    transforms:
+      # Contrast & Brightness
+      - name: "CLAHE"
+        params:
+          clip_limit: 4.0
+          tile_grid_size: [8, 8]
+          p: 0.5
+      
+      - name: "RandomBrightnessContrast"
+        params:
+          brightness_limit: 0.2
+          contrast_limit: 0.2
+          p: 0.5
+      
+      - name: "RandomGamma"
+        params:
+          gamma_limit: [80, 120]
+          p: 0.3
+      
+      # Noise & Blur
+      - name: "GaussNoise"
+        params:
+          var_limit: [10.0, 50.0]
+          p: 0.3
+      
+      - name: "GaussianBlur"
+        params:
+          blur_limit: [3, 7]
+          p: 0.2
+      
+      - name: "MedianBlur"
+        params:
+          blur_limit: 5
+          p: 0.1
+      
+      # Geometric
+      - name: "ShiftScaleRotate"
+        params:
+          shift_limit: 0.1
+          scale_limit: 0.2
+          rotate_limit: 15
+          border_mode: 0
+          p: 0.5
+      
+      - name: "ElasticTransform"
+        params:
+          alpha: 1
+          sigma: 50
+          alpha_affine: 50
+          p: 0.1
+      
+      # Occlusion
+      - name: "CoarseDropout"
+        params:
+          max_holes: 8
+          max_height: 32
+          max_width: 32
+          min_holes: 1
+          min_height: 8
+          min_width: 8
+          fill_value: 0
+          p: 0.3
+      
+      - name: "GridDistortion"
+        params:
+          num_steps: 5
+          distort_limit: 0.3
+          p: 0.2
+      
+      # Histogram operations
+      - name: "Equalize"
+        params:
+          mode: "cv"
+          by_channels: true
+          p: 0.2
+      
+      - name: "Sharpen"
+        params:
+          alpha: [0.2, 0.5]
+          lightness: [0.5, 1.0]
+          p: 0.2
+
+# ============================================
+# ADVANCED TECHNIQUES
+# ============================================
+advanced:
+  # Mosaic augmentation
+  mosaic:
+    enabled: true
+    mosaic4_prob: 0.8   # 4 görüntü
+    mosaic9_prob: 0.2   # 9 görüntü
+  
+  # MixUp
+  mixup:
+    enabled: true
+    alpha: 0.5          # Beta distribution parameter
+    prob: 0.1
+  
+  # Copy-Paste
+  copy_paste:
+    enabled: false       # X-ray için dikkatli kullanılmalı
+    prob: 0.0
+    iou_threshold: 0.3
+  
+  # CutMix
+  cutmix:
+    enabled: false
+    alpha: 1.0
+    prob: 0.0
+
+# ============================================
+# SAHI SLICING - PHASE 2
+# ============================================
+sahi:
+  enabled: true
+  
+  # Slice parametreleri
+  slice_height: 512
+  slice_width: 512
+  overlap_height_ratio: 0.2
+  overlap_width_ratio: 0.2
+  
+  # Post-processing
+  postprocess_type: "NMS"  # "NMS" veya "GREEDYNMM"
+  postprocess_match_metric: "IOS"  # "IOU" veya "IOS"
+  postprocess_match_threshold: 0.5
+  postprocess_class_agnostic: false
+  
+  # Performans
+  auto_slice_resolution: true  # Otomatik slice boyutu belirleme
+  verbose: 1
+
+# ============================================
+# CLASS-SPECIFIC AUGMENTATION
+# ============================================
+class_specific:
+  # Küçük nesneler için ekstra augmentation
+  small_objects:
+    enabled: true
+    classes: ["Bullet", "HandCuffs"]
+    extra_augmentation_prob: 0.3
+    
+    # Küçük nesnelere özel teknikler
+    transforms:
+      - "zoom_in"       # Nesneyi yakınlaştır
+      - "brightness+"   # Daha parlak yap
+      - "sharpen"       # Keskinleştir
+  
+  # Rare sınıflar için ekstra örnekleme
+  rare_classes:
+    enabled: true
+    classes: ["Baton"]  # 538 örnek (en az)
+    oversampling_factor: 2.0  # 2x daha fazla örnekle
+
+# ============================================
+# VALIDATION AUGMENTATION
+# ============================================
+validation:
+  # Validation sırasında augmentation (genellikle false)
+  enabled: false
+  
+  # Sadece normalize ve resize
+  transforms:
+    - "resize"
+    - "normalize"
+
+# ============================================
+# NORMALIZATION
+# ============================================
+normalization:
+  # ImageNet stats (YOLOv11 default)
+  mean: [0.0, 0.0, 0.0]  # YOLO kendi normalleştirmesini yapar
+  std: [1.0, 1.0, 1.0]
+  
+  # Özel normalizasyon (X-ray için)
+  custom_normalize: false
+  custom_mean: [0.485, 0.456, 0.406]
+  custom_std: [0.229, 0.224, 0.225]
+
+
+

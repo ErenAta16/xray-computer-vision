@@ -1,0 +1,240 @@
+# YOLOv11 X-Ray Security System - Ensemble Configuration
+# PHASE 2: Model Ensemble Strategies
+
+# ============================================
+# ENSEMBLE MODELS
+# ============================================
+models:
+  # Kullanılacak modeller
+  model_list:
+    - name: "yolov11n"
+      path: "yuksekdogrulukbest.pt"
+      weight: 1.0
+      img_size: 640
+      conf_threshold: 0.25
+      enabled: true
+    
+    # Eğer başka modeller eğitirseniz:
+    # - name: "yolov11s"
+    #   path: "models/checkpoints/yolov11s_trained.pt"
+    #   weight: 1.2  # Daha iyi performans gösteriyorsa ağırlığı artır
+    #   img_size: 640
+    #   conf_threshold: 0.25
+    #   enabled: true
+    
+    # - name: "yolov11m"
+    #   path: "models/checkpoints/yolov11m_trained.pt"
+    #   weight: 1.5
+    #   img_size: 640
+    #   conf_threshold: 0.20
+    #   enabled: true
+  
+  # Multi-scale ensemble
+  multi_scale:
+    enabled: false
+    scales: [512, 640, 768]  # Aynı modeli farklı boyutlarda çalıştır
+
+# ============================================
+# FUSION METHODS
+# ============================================
+fusion:
+  # Ana fusion stratejisi
+  method: "wbf"  # "wbf", "nms", "soft_nms", "nmw"
+  
+  # Weighted Boxes Fusion (WBF) - ÖNERİLEN
+  wbf:
+    iou_threshold: 0.55
+    skip_box_threshold: 0.25
+    conf_type: "avg"  # "avg", "max", "box_and_model_avg"
+    allows_overflow: false
+  
+  # Non-Maximum Suppression (NMS)
+  nms:
+    iou_threshold: 0.45
+    conf_threshold: 0.25
+  
+  # Soft-NMS
+  soft_nms:
+    iou_threshold: 0.45
+    sigma: 0.5
+    thresh: 0.001
+    method: "linear"  # "linear", "gaussian"
+  
+  # Non-Maximum Weighted (NMW)
+  nmw:
+    iou_threshold: 0.55
+    skip_box_threshold: 0.25
+
+# ============================================
+# ENSEMBLE STRATEGIES
+# ============================================
+strategies:
+  # Strateji 1: Basit ensemble
+  simple:
+    enabled: true
+    description: "Tüm modellerin tahminlerini birleştir"
+    use_all_models: true
+  
+  # Strateji 2: Class-specific ensemble
+  class_specific:
+    enabled: false
+    description: "Her sınıf için en iyi modeli kullan"
+    # Hangi model hangi sınıfta iyi?
+    class_model_mapping:
+      Baton: ["yolov11n"]
+      Bullet: ["yolov11s", "yolov11m"]  # Küçük nesne
+      Gun: ["yolov11n", "yolov11m"]
+      Hammer: ["yolov11n"]
+      HandCuffs: ["yolov11s", "yolov11m"]  # Küçük nesne
+      Knife: ["yolov11n", "yolov11m"]
+      Lighter: ["yolov11n"]
+      Pliers: ["yolov11n"]
+      Powerbank: ["yolov11n"]
+      Scissors: ["yolov11n"]
+      Sprayer: ["yolov11n"]
+      Wrench: ["yolov11n"]
+  
+  # Strateji 3: Confidence-based selection
+  confidence_based:
+    enabled: false
+    description: "En yüksek confidence'a sahip modeli seç"
+    min_confidence_diff: 0.1  # Minimum fark
+  
+  # Strateji 4: Voting
+  voting:
+    enabled: false
+    description: "Modellerin çoğunluk oylaması"
+    min_votes: 2  # En az kaç model tespit etmeli
+    vote_threshold: 0.5  # Oy oranı
+
+# ============================================
+# POST-PROCESSING
+# ============================================
+post_processing:
+  # Ensemble sonrası ek filtreleme
+  
+  # Minimum confidence threshold
+  min_confidence: 0.25
+  
+  # Class-specific confidence thresholds
+  class_thresholds:
+    enabled: false
+    thresholds:
+      Baton: 0.30
+      Bullet: 0.35    # Küçük nesne, daha dikkatli
+      Gun: 0.30
+      Hammer: 0.25
+      HandCuffs: 0.35 # Küçük nesne, daha dikkatli
+      Knife: 0.30
+      Lighter: 0.25
+      Pliers: 0.25
+      Powerbank: 0.25
+      Scissors: 0.25
+      Sprayer: 0.25
+      Wrench: 0.25
+  
+  # Box area filtering
+  box_filtering:
+    enabled: false
+    min_box_area: 100   # Minimum box alanı (piksel²)
+    max_box_area: 500000  # Maximum box alanı
+  
+  # Aspect ratio filtering
+  aspect_ratio_filtering:
+    enabled: false
+    min_ratio: 0.1
+    max_ratio: 10.0
+  
+  # Border filtering (kenar yakınındaki tespitleri filtrele)
+  border_filtering:
+    enabled: false
+    border_width: 10  # Piksel cinsinden
+
+# ============================================
+# PERFORMANCE OPTIMIZATION
+# ============================================
+optimization:
+  # Paralel inference
+  parallel_inference: true
+  num_workers: 4  # CPU core sayısına göre ayarla
+  
+  # Batch processing
+  batch_processing: true
+  batch_size: 8
+  
+  # Caching
+  cache_predictions: true
+  cache_dir: ".cache/ensemble"
+  
+  # Early stopping
+  early_stop:
+    enabled: false
+    confidence_threshold: 0.95  # Bu kadar yüksek confidence varsa diğer modelleri çalıştırma
+
+# ============================================
+# EVALUATION & COMPARISON
+# ============================================
+evaluation:
+  # Her modeli ayrı ayrı değerlendir
+  individual_evaluation: true
+  
+  # Ensemble vs single model karşılaştırması
+  compare_with_best_single: true
+  
+  # Metrikler
+  metrics:
+    - "mAP@0.5"
+    - "mAP@0.5:0.95"
+    - "Precision"
+    - "Recall"
+    - "F1-Score"
+    - "Inference Time"
+  
+  # Per-class analysis
+  per_class_analysis: true
+  
+  # Save detailed report
+  save_report: true
+  report_format: "html"  # "html", "pdf", "markdown"
+
+# ============================================
+# ADVANCED ENSEMBLE TECHNIQUES
+# ============================================
+advanced:
+  # Stacking (meta-model)
+  stacking:
+    enabled: false
+    meta_model: "logistic_regression"  # "lr", "rf", "xgboost"
+    features: ["confidence", "box_size", "aspect_ratio"]
+  
+  # Boosting
+  boosting:
+    enabled: false
+    method: "adaboost"
+    n_estimators: 50
+  
+  # Dynamic ensemble (görüntü özelliklerin göre model seçimi)
+  dynamic_ensemble:
+    enabled: false
+    selection_criteria:
+      - "image_brightness"
+      - "image_contrast"
+      - "object_density"
+
+# ============================================
+# DEBUGGING & LOGGING
+# ============================================
+debug:
+  verbose: true
+  save_intermediate_results: false
+  visualize_each_model: false
+  log_detailed_metrics: true
+  
+  # Hangi durumlarda detaylı log?
+  log_conditions:
+    low_agreement: true  # Modeller anlaşmazsa
+    low_confidence: true  # Düşük confidence
+    multiple_predictions: true  # Çok sayıda tespit
+
+
+

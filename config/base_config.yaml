@@ -1,0 +1,159 @@
+# YOLOv11 X-Ray Security System - Base Configuration
+# Tarih: 2024-12-26
+
+# ============================================
+# MODEL AYARLARI
+# ============================================
+model:
+  path: "best.pt"  # Fine-tuned yeni model
+  type: "yolov11"
+  task: "detect"
+  
+  # Model parametreleri
+  img_size: 640
+  device: "cuda:0"  # "cuda:0" veya "cpu"
+  half_precision: false  # FP16 inference (GPU gerekir)
+  
+  # Alternative model paths (ensemble için)
+  ensemble_models:
+    - "yuksekdogrulukbest.pt"
+    # - "models/checkpoints/yolov11s_v2.pt"
+    # - "models/checkpoints/yolov11m_v1.pt"
+
+# ============================================
+# SINIF TANIMLARI
+# ============================================
+classes:
+  names:
+    0: "Baton"
+    1: "Bullet"
+    2: "Gun"
+    3: "Hammer"
+    4: "HandCuffs"
+    5: "Knife"
+    6: "Lighter"
+    7: "Pliers"
+    8: "Powerbank"
+    9: "Scissors"
+    10: "Sprayer"
+    11: "Wrench"
+  
+  # Sınıf örnekleri (eğitim datasından)
+  counts:
+    Baton: 538
+    Bullet: 611
+    Gun: 741
+    Hammer: 1238
+    HandCuffs: 710
+    Knife: 1149
+    Lighter: 1337
+    Pliers: 1446
+    Powerbank: 1756
+    Scissors: 1438
+    Sprayer: 972
+    Wrench: 1505
+  
+  # Küçük nesneler (özel dikkat gerektirir)
+  small_objects: ["Bullet", "HandCuffs"]
+  
+  # Uzun nesneler (OBB için ideal)
+  long_objects: ["Knife", "Gun", "Baton"]
+
+# ============================================
+# INFERENCE AYARLARI
+# ============================================
+inference:
+  # Temel parametreler
+  conf_threshold: 0.25  # Confidence threshold
+  iou_threshold: 0.45   # NMS IoU threshold
+  max_det: 300          # Maksimum tespit sayısı
+  
+  # Batch processing
+  batch_size: 1         # CPU için 1, GPU için 8-16
+  
+  # Augmentation sırasında kullanılacak
+  agnostic_nms: false   # Class-agnostic NMS
+  multi_label: false    # Multi-label per box
+
+# ============================================
+# VERİ YOLLARI
+# ============================================
+paths:
+  # Test verileri
+  test_images: "data/test"
+  test_labels: "data/test/labels"  # YOLO format
+  
+  # Sonuç klasörleri
+  results_dir: "results"
+  baseline_dir: "results/baseline"
+  
+  # Cache
+  cache_dir: ".cache"
+
+# ============================================
+# VISUALIZATION AYARLARI
+# ============================================
+visualization:
+  save_images: true
+  save_txt: true        # Tahminleri txt olarak kaydet
+  save_conf: true       # Confidence skorlarını kaydet
+  
+  # Görselleştirme parametreleri
+  line_thickness: 2
+  font_size: 12
+  show_labels: true
+  show_conf: true
+  
+  # Renk şeması (BGR format)
+  color_map:
+    Baton: [138, 43, 226]      # Blue Violet
+    Bullet: [255, 105, 180]    # Hot Pink
+    Gun: [255, 0, 0]           # Blue
+    Hammer: [255, 0, 255]      # Magenta
+    HandCuffs: [255, 255, 0]   # Cyan
+    Knife: [0, 0, 255]         # Red
+    Lighter: [0, 165, 255]     # Orange
+    Pliers: [255, 0, 0]        # Blue
+    Powerbank: [42, 42, 165]   # Brown
+    Scissors: [255, 255, 0]    # Cyan
+    Sprayer: [0, 255, 255]     # Yellow
+    Wrench: [0, 255, 0]        # Green
+
+# ============================================
+# PERFORMANCE TRACKING
+# ============================================
+tracking:
+  use_wandb: false      # Weights & Biases
+  use_tensorboard: true # TensorBoard
+  project_name: "xray-security-system"
+  experiment_name: "baseline"
+  
+  # Metrikler
+  metrics:
+    - "mAP@0.5"
+    - "mAP@0.5:0.95"
+    - "Precision"
+    - "Recall"
+    - "F1-Score"
+    - "Inference Time"
+
+# ============================================
+# SINIRLAYICI DEĞİŞKENLER
+# ============================================
+constraints:
+  max_inference_time_ms: 100  # Maksimum inference süresi (real-time için)
+  min_precision: 0.80         # Minimum precision hedefi
+  min_recall: 0.75            # Minimum recall hedefi
+  min_map50: 0.85             # Minimum mAP@0.5 hedefi
+
+# ============================================
+# DEBUG & LOGGING
+# ============================================
+debug:
+  verbose: true
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_file: "logs/app.log"
+  save_failed_detections: true  # Başarısız tespitleri kaydet
+
+
+
